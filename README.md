@@ -1,4 +1,4 @@
-# Cookie Reuse & MFA Bypass — Red vs. Blue Cyber Range
+# Cookie Bypass CTF Lab (Cyber Range)
 
 A self-contained, Docker-deployable training lab simulating a corporate **Admin Feedback System** with a flawed MFA/session model. Built for the "Cybersecurity Engineer (Lab & Range Developer)" practical assessment.
 
@@ -218,7 +218,7 @@ grep "10.10.14.50" access.log | grep "verify-mfa"
 | Log Forensics | `SCENARIO75{Mozilla/5.0}` |
 | Log Forensics | `SCENARIO75{200}` |
 | Log Forensics | `SCENARIO75{18:51:55}` |
-| Log Forensics | `SCENARIO75{<base64 X-Forwarded-For string>}` |
+| Log Forensics | `SCENARIO75{UEhBTlRPTUdSSUR7QkxVRV9MMGdfSHVudDNyX000c3Qzcn0=}` |
 | Threat Hunting | `SCENARIO75{192.168.1.100}` |
 | Threat Hunting | `SCENARIO75{10.10.14.0/24}` |
 | Threat Hunting | `SCENARIO75{/opt/admin/logs/error.log}` |
@@ -240,18 +240,45 @@ grep "10.10.14.50" access.log | grep "verify-mfa"
 
 ```
 .
-├── app/                    # Vulnerable Node.js web application
-│   ├── server.js
-│   ├── routes/
-│   ├── public/
+├── app/                        # Vulnerable Node.js web application
+│   ├── src/
+│   │   ├── config/             # Environment & flag configurations
+│   │   ├── middleware/         # WAF, telemetry logger, session handlers
+│   │   ├── routes/             # auth, feedback, dashboard endpoints
+│   │   ├── services/           # telemetry, feedback, auth services
+│   │   ├── views/              # index.html (ASCII hint), dashboard.html
+│   │   ├── public/             # CSS styling, robots.txt
+│   │   └── server.js           # Server entry point
+│   ├── test_all.js             # Comprehensive 15-check validation suite
 │   └── package.json
-├── logs/                   # Bind-mounted to /opt/admin/logs in container
+├── docker/
+│   ├── nginx/                  # Nginx reverse proxy Dockerfile & config (Port 3075)
+│   └── node/                   # Node.js backend Dockerfile (Port 8080)
+├── logs/                       # Access and error logs (/opt/admin/logs)
 ├── scripts/
-│   ├── inject_logs.py      # Generates the simulated attack telemetry
-│   └── provision_vm.sh     # Full Proxmox VM bootstrap (Docker, SSH, deploy)
-├── docker-compose.yml
-├── Dockerfile
-└── README.md                 ← you are here
+│   ├── provision_vm.sh         # Proxmox VM bootstrap script (Docker, SSH, deploy)
+│   ├── inject_logs.py          # Generates simulated forensic telemetry
+│   ├── red_team_exploit.py     # Automated Red Team 3-phase exploit demonstration
+│   ├── blue_team_verify.py     # Automated Blue Team forensic log analysis
+│   └── healthcheck.sh          # Endpoint liveness and health verification
+├── vm/
+│   └── cloud-init.yaml         # Cloud-Init template for unattended Proxmox VM setup
+├── docker-compose.yaml         # Multi-container service definitions
+├── .env.example
+└── README.md                   # Lab documentation & walkthrough
+```
+
+### Automated Verification
+
+```bash
+# 1. Run Node.js Application Test Suite (All 15 Red Team assertions)
+cd app && npm test
+
+# 2. Run Red Team Exploit Chain Demonstration
+python3 scripts/red_team_exploit.py http://localhost:3075
+
+# 3. Run Blue Team Log Forensics & Threat Hunting Analysis
+python3 scripts/blue_team_verify.py ./logs
 ```
 
 ---

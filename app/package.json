@@ -1,5 +1,5 @@
 {
-  "name": "nodejs-cyberrange",
+  "name": "cookie-bypass-ctf-lab",
   "version": "1.0.0",
   "description": "self contained, docker-deployable red vs blue CTF lab with full forensic telemetry",
   "keywords": [
@@ -7,13 +7,13 @@
     "nodejs",
     "cyberrange"
   ],
-  "homepage": "https://github.com/yehezkiel1086/nodejs-cyberrange#readme",
+  "homepage": "https://github.com/yehezkiel1086/cookie-bypass-ctf-lab#readme",
   "bugs": {
-    "url": "https://github.com/yehezkiel1086/nodejs-cyberrange/issues"
+    "url": "https://github.com/yehezkiel1086/cookie-bypass-ctf-lab/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yehezkiel1086/nodejs-cyberrange.git"
+    "url": "git+https://github.com/yehezkiel1086/cookie-bypass-ctf-lab.git"
   },
   "license": "ISC",
   "author": "yehezkiel1086",

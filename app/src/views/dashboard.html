@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Restricted Area</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="navbar">
+    <div class="container">
+      <div class="logo">
+        <span class="icon">⚙️</span>
+        <span class="brand">Admin Operations Console</span>
+      </div>
+      <div class="nav-links">
+        <span class="user-tag">Admin: secadmin_01</span>
+        <a href="/" class="nav-item">Feedback Form</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    <section class="card">
+      <div class="dashboard-header">
+        <div>
+          <h2>Restricted Admin Review Queue</h2>
+          <p class="subtitle">Confidential internal feedback and telemetry monitoring.</p>
+        </div>
+        <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border-color: #059669;">MFA Verified Session Active</span>
+      </div>
+
+      <div class="flag-box">
+        Flag: <span id="admin-flag">SCENARIO75{RED_C00k13_MFA_Byp4ss_0wn3d}</span>
+      </div>
+
+      <div style="margin-top: 2rem;">
+        <h3 style="margin-bottom: 1rem; font-size: 1.15rem;">Submitted Feedback Items</h3>
+        <div id="feedback-list">
+          {{FEEDBACK_ITEMS}}
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2026 Admin Feedback System — Restricted Internal Console</p>
+    </div>
+  </footer>
+</body>
+</html>

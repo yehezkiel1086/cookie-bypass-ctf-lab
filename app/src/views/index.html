@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Feedback System - Corporate Internal Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!--
+  ==============================================================
+  [ASCII ART]
+         [o_o]    BEEP BOOP...
+        /|___|\   INTERNAL AUDIT NOTICE:
+         d   b    Automated crawlers prohibited.
+                  Check robots.txt for disallowed endpoints!
+  ==============================================================
+  -->
+
+  <header class="navbar">
+    <div class="container">
+      <div class="logo">
+        <span class="icon">🛡️</span>
+        <span class="brand">CorpSec Admin Feedback System</span>
+      </div>
+      <div class="nav-links">
+        <span class="badge">Internal Network Zone</span>
+        <a href="/dashboard" class="nav-item">Admin Dashboard</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    <section class="card feedback-card">
+      <div class="card-header">
+        <h2>Submit Feedback to System Administrators</h2>
+        <p class="subtitle">Please report operational feedback, suggestions, or potential security anomalies directly to the admin review queue.</p>
+      </div>
+
+      <div id="alert-box" class="alert hidden"></div>
+
+      <form id="feedback-form" action="/api/feedback" method="POST">
+        <div class="form-group">
+          <label for="department">Department</label>
+          <select id="department" name="department" class="form-control">
+            <option value="IT">IT Infrastructure</option>
+            <option value="SecOps">SecOps & SOC</option>
+            <option value="Audit">Internal Compliance</option>
+            <option value="Engineering">Software Engineering</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="message">Feedback / Incident Description</label>
+          <textarea id="message" name="message" rows="6" class="form-control" placeholder="Enter your detailed feedback for administrator review..." required></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="submit-btn">
+            <span>Send Feedback to Admin Queue</span>
+          </button>
+        </div>
+      </form>
+
+      <div class="system-notice">
+        <small>Notice: Submitted items are queued for direct review on the authenticated administrator dashboard. Ensure no confidential credentials are transmitted unencrypted.</small>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2026 Corporate Internal Services. Monitored Environment.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Handle form submission via AJAX or standard POST
+    const form = document.getElementById('feedback-form');
+    const alertBox = document.getElementById('alert-box');
+
+    form.addEventListener('submit', async (e) => {
+      // Standard form submissions still work, but enhance with immediate UI feedback
+      e.preventDefault();
+      const message = document.getElementById('message').value;
+      const department = document.getElementById('department').value;
+      
+      try {
+        const response = await fetch('/api/feedback', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: new URLSearchParams({ department, message })
+        });
+
+        const data = await response.json();
+
+        alertBox.className = 'alert ' + (response.ok ? 'alert-success' : 'alert-danger');
+        alertBox.textContent = data.message || (response.ok ? 'Feedback received successfully.' : 'Error submitting feedback.');
+        alertBox.classList.remove('hidden');
+
+        if (response.ok) {
+          form.reset();
+        }
+      } catch (err) {
+        alertBox.className = 'alert alert-danger';
+        alertBox.textContent = 'Submission error: ' + err.message;
+        alertBox.classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "name": "nodejs-cyberrange",
+  "version": "1.0.0",
+  "description": "self contained, docker-deployable red vs blue CTF lab with full forensic telemetry",
+  "keywords": [
+    "ctf",
+    "nodejs",
+    "cyberrange"
+  ],
+  "homepage": "https://github.com/yehezkiel1086/nodejs-cyberrange#readme",
+  "bugs": {
+    "url": "https://github.com/yehezkiel1086/nodejs-cyberrange/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yehezkiel1086/nodejs-cyberrange.git"
+  },
+  "license": "ISC",
+  "author": "yehezkiel1086",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node test_all.js"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0"
+  }
+}

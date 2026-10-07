@@ -1,0 +1,28 @@
+#cloud-config
+hostname: feedback-admin-local
+fqdn: feedback.admin.local
+manage_etc_hosts: true
+
+users:
+  - name: analyst
+    gecos: Blue Team Analyst
+    primary_group: analyst
+    groups: users
+    shell: /bin/bash
+    lock_passwd: false
+    passwd: "$6$rounds=4096$rounds$O6q8x7D.1pXj9s9r$uXwF45h9BvC0D0kM1xP8iY3jU5mL7aV9bQ2eR4tW6yZ8" # blue_team_rocks
+
+package_update: true
+package_upgrade: true
+packages:
+  - curl
+  - git
+  - ca-certificates
+  - gnupg
+  - python3
+  - python3-pip
+  - openssh-server
+
+runcmd:
+  - mkdir -p /opt/lab
+  - [ sh, -c, "if [ -f /opt/lab/scripts/provision_vm.sh ]; then bash /opt/lab/scripts/provision_vm.sh; fi" ]

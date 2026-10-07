@@ -1,0 +1,21 @@
+services:
+
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    ports:
+      - "3075:3075"
+    depends_on:
+      - app
+    volumes:
+      - ./logs:/var/log/nginx
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/node/Dockerfile
+    expose:
+      - "8080"
+    volumes:
+      - ./logs:/opt/admin/logs

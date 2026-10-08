@@ -34,6 +34,7 @@ A self-contained, Docker-deployable training lab simulating an **Admin Feedback 
   - [Phase 3: Incident Response & Flag Recovery](#phase-3-incident-response--flag-recovery)
   - [Automated Blue Team Proof](#automated-blue-team-proof)
 - [Master CTF Flags Reference](#master-ctf-flags-reference)
+- [Student Flag Submission & Challenge Tracking](#student-flag-submission--challenge-tracking)
 - [Repository Structure](#repository-structure)
 - [Lab Teardown & Reset](#lab-teardown--reset)
 - [Reviewer Notes & Grading Criteria](#reviewer-notes--grading-criteria)
@@ -610,6 +611,48 @@ python3 scripts/blue_team_verify.py /opt/admin/logs
 
 ---
 
+## Student Flag Submission & Challenge Tracking
+
+Students and instructors have multiple convenient ways to submit flags and track challenge progress:
+
+### 1. Interactive CTF Scoreboard & Submission Tool (`scripts/scoreboard.py`)
+
+A built-in, terminal-based scoreboard is provided for students and evaluation sessions. It tracks solved challenges in real time, displays a visual completion bar, and computes total scores across both Red and Blue team paths.
+
+```bash
+# Launch the interactive scoreboard interface
+python3 scripts/scoreboard.py
+```
+
+#### CLI Quick Commands:
+```bash
+# Submit a single flag directly
+python3 scripts/scoreboard.py --submit "SCENARIO75{Node.js}"
+
+# View overall challenge status and solved progress
+python3 scripts/scoreboard.py --status
+
+# View team-specific challenges
+python3 scripts/scoreboard.py --status RED
+python3 scripts/scoreboard.py --status BLUE
+
+# Reset progress back to 0
+python3 scripts/scoreboard.py --reset
+```
+
+> [!TIP]
+> **Flexible Flag Submission:** The scoreboard accepts both the full format (e.g., `SCENARIO75{Node.js}`) and the inner solution string (e.g., `Node.js`).
+
+---
+
+### 2. Enterprise CTF Architecture (External Scoring Engines)
+
+In standard organizational cybersecurity exercises or university competitions:
+* **The Cyber Range VM** serves as the **Target Box / Challenge Host** (containing the vulnerabilities, services, and telemetry logs).
+* **A Centralized CTF Platform (e.g. [CTFd](https://ctfd.io/))** serves as the **Scoring Platform**. Challenge administrators import the questions from the [Master CTF Flags Reference](#master-ctf-flags-reference) into CTFd, where students register team accounts, enter flags, and compete on a public scoreboard.
+
+---
+
 ## Repository Structure
 
 ```
@@ -630,6 +673,7 @@ python3 scripts/blue_team_verify.py /opt/admin/logs
 │   └── node/                   # Node.js backend Dockerfile (Port 8080)
 ├── logs/                       # Access and error logs (/opt/admin/logs)
 ├── scripts/
+│   ├── scoreboard.py           # Interactive student CTF scoreboard & flag submission
 │   ├── provision_vm.sh         # Proxmox VM bootstrap script (Docker, SSH, deploy)
 │   ├── setup-ssh.sh            # Custom port 2275 SSH config for analyst user
 │   ├── inject_logs.py          # Generates simulated forensic telemetry

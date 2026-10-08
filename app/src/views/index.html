@@ -25,7 +25,7 @@
       </div>
       <div class="nav-links">
         <span class="badge">Internal Network Zone</span>
-        <a href="/dashboard" class="nav-item">Admin Dashboard</a>
+        <span id="admin-nav-slot"></span>
       </div>
     </div>
   </header>
@@ -78,6 +78,14 @@
     // Handle form submission via AJAX with robust response handling
     const form = document.getElementById('feedback-form');
     const alertBox = document.getElementById('alert-box');
+
+    // Strictly restricted admin area: only render link if authenticated admin cookie is present
+    if (document.cookie && document.cookie.includes('adm_sess')) {
+      const slot = document.getElementById('admin-nav-slot');
+      if (slot) {
+        slot.innerHTML = '<a href="/dashboard" class="nav-item" style="color:#38bdf8; text-decoration:none; font-size:0.9rem;">Admin Dashboard</a>';
+      }
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();

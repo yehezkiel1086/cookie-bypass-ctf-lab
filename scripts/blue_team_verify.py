@@ -121,5 +121,10 @@ def verify_forensics(log_dir):
     print("=" * 65)
 
 if __name__ == "__main__":
-    target_dir = sys.argv[1] if len(sys.argv) > 1 else "./logs"
+    if len(sys.argv) > 1:
+        target_dir = sys.argv[1]
+    elif os.path.exists("/opt/admin/logs"):
+        target_dir = "/opt/admin/logs"
+    else:
+        target_dir = "./logs"
     verify_forensics(target_dir)

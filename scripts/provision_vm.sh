@@ -9,7 +9,8 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-LAB_DIR="/opt/lab"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LAB_DIR="${LAB_DIR:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 LOG_DIR="/opt/admin/logs"
 
 # 1. Update and install prerequisites
@@ -17,16 +18,17 @@ echo "[+] Updating apt repositories and installing packages..."
 apt-get update -y
 apt-get install -y ca-certificates curl gnupg lsb-release python3 python3-pip openssh-server
 
-# 2. Install Docker if not present
+# 2. Install Docker if not present (Ubuntu 22.04 & 24.04 compatible)
 if ! command -v docker &> /dev/null; then
   echo "[+] Installing Docker..."
   install -m 0755 -d /etc/apt/keyrings
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-  chmod a+r /etc/apt/keyrings/docker.gpg
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  chmod a+r /etc/apt/keyrings/docker.asc
 
+  CODENAME="$(. /etc/os-release && echo "$VERSION_CODENAME")"
   echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-    $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+    ${CODENAME} stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
   apt-get update -y
   apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
@@ -35,7 +37,7 @@ fi
 
 # 3. Setup Blue Team SSH Analyst User on Port 2275 (/etc/ssh/sshd_config)
 echo "[+] Configuring Blue Team SSH service (/etc/ssh/sshd_config on port 2275)..."
-bash "$LAB_DIR/scripts/setup-ssh.sh"
+bash "$SCRIPT_DIR/setup-ssh.sh"
 
 # 4. Prepare logs directory
 mkdir -p "$LOG_DIR"

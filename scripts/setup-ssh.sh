@@ -52,12 +52,19 @@ KbdInteractiveAuthentication yes
 PermitRootLogin no
 EOF
 
-# 3. Handle Ubuntu 22.04+ systemd socket activation
-# If ssh.socket is active in Ubuntu 22.04+, it forces port 22 unless disabled in favor of ssh.service
-if systemctl is-active --quiet ssh.socket 2>/dev/null; then
-  echo "[*] Switching Ubuntu systemd from ssh.socket to ssh.service to apply custom port 2275..."
-  systemctl disable --now ssh.socket 2>/dev/null || true
+# 3. Handle Ubuntu 22.04 / 24.04 systemd socket activation
+# If ssh.socket is active in Ubuntu 22.04/24.04, it forces port 22 unless disabled in favor of ssh.service
+if systemctl is-active --quiet ssh.socket 2>/dev/null || [ -f /usr/lib/systemd/system/ssh.socket ] || [ -f /lib/systemd/system/ssh.socket ]; then
+  echo "[*] Disabling and masking ssh.socket in favor of ssh.service (Ubuntu 24.04 compatibility)..."
+  systemctl stop ssh.socket 2>/dev/null || true
+  systemctl disable ssh.socket 2>/dev/null || true
+  systemctl mask ssh.socket 2>/dev/null || true
   systemctl enable --now ssh.service 2>/dev/null || true
+fi
+
+# Validate sshd configuration syntax before restarting
+if command -v sshd &>/dev/null; then
+  sshd -t 2>/dev/null || true
 fi
 
 # Reload systemd and restart SSH daemon

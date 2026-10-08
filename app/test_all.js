@@ -175,6 +175,59 @@ async function runComprehensiveTests() {
       "SCENARIO75{RED_C00k13_MFA_Byp4ss_0wn3d}"
     );
 
+    // -------------------------------------------------------------
+    // FLAG SUBMISSION & CHALLENGE TRACKING PORTAL (/flag)
+    // -------------------------------------------------------------
+    console.log("\n--- [FLAG TRACKER & SUBMISSION PORTAL (/flag)] ---");
+
+    // Reset before tests
+    await request("/flag/reset", { method: "POST", headers: { "Accept": "application/json" } });
+
+    const flagPageRes = await request("/flag");
+    assert(
+      flagPageRes.status === 200 && flagPageRes.body.includes("Flag Submission & Challenge Tracker"),
+      "GET /flag serves interactive challenge tracker and submission portal"
+    );
+
+    const flagStatusRes = await request("/api/flag/status", { headers: { "Accept": "application/json" } });
+    const statusData = JSON.parse(flagStatusRes.body);
+    assert(
+      flagStatusRes.status === 200 && statusData.challenges?.length === 33 && statusData.summary?.totalChallenges === 33,
+      "GET /api/flag/status exposes all 33 CTF challenges and completion summary"
+    );
+
+    const submitRes = await request("/flag", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({ flag: "SCENARIO75{Node.js}" })
+    });
+    const submitData = JSON.parse(submitRes.body);
+    assert(
+      submitRes.status === 200 && submitData.success === true && submitData.challenge?.id === "red-01",
+      "POST /flag validates discovered flag and tracks challenge as submitted"
+    );
+
+    const duplicateRes = await request("/flag", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({ flag: "SCENARIO75{Node.js}" })
+    });
+    const dupData = JSON.parse(duplicateRes.body);
+    assert(
+      duplicateRes.status === 409 && dupData.alreadySubmitted === true,
+      "POST /flag accurately identifies duplicate flag submissions"
+    );
+
+    const resetRes = await request("/flag/reset", {
+      method: "POST",
+      headers: { "Accept": "application/json" }
+    });
+    const resetData = JSON.parse(resetRes.body);
+    assert(
+      resetRes.status === 200 && resetData.success === true,
+      "POST /flag/reset successfully resets challenge tracker state"
+    );
+
     console.log("\n===============================================================");
     console.log(`TOTAL RESULTS: ${passed} PASSED, ${failed} FAILED.`);
     console.log("===============================================================");

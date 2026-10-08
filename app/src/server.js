@@ -8,6 +8,7 @@ import { sessionMiddleware } from "./middleware/session.js";
 import authRoutes from "./routes/auth.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import feedbackRoutes from "./routes/feedback.js";
+import flagRoutes from "./routes/flag.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -46,6 +47,7 @@ app.use(express.static(path.resolve(__dirname, "public")));
 app.use(authRoutes);
 app.use(feedbackRoutes);
 app.use(dashboardRoutes);
+app.use(flagRoutes);
 
 const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
 

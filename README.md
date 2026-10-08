@@ -203,6 +203,7 @@ bash scripts/healthcheck.sh 3075 localhost
 | Role / Surface | Protocol & Port | URL / Command | Credentials / Notes |
 |---|---|---|---|
 | **Web Application** | HTTP (Port `3075`) | `http://feedback.admin.local:3075/` | Public submission & admin login |
+| **Flag Tracker & Scoreboard** | HTTP (Port `3075`) | `http://feedback.admin.local:3075/flag` | Web flag submission & challenge tracking |
 | **Blue Team SSH** | SSH (Port `2275`) | `ssh analyst@feedback.admin.local -p 2275` | User: `analyst`<br>Password: `blue_team_rocks` |
 | **Forensic Logs** | Local Filesystem | `/opt/admin/logs/{access.log, error.log}` | Readable by group `analyst` |
 | **Backend Internal** | HTTP (Port `8080`) | `http://localhost:8080/` | Internal Docker container port |
@@ -615,7 +616,22 @@ python3 scripts/blue_team_verify.py /opt/admin/logs
 
 Students and instructors have multiple convenient ways to submit flags and track challenge progress:
 
-### 1. Interactive CTF Scoreboard & Submission Tool (`scripts/scoreboard.py`)
+### 1. Web Portal Submission & Tracking (`/flag`)
+
+The lab provides an interactive, dark-themed **Flag Submission & Challenge Tracker** directly in the browser at:
+**`http://feedback.admin.local:3075/flag`** (or `http://localhost:3075/flag`)
+
+#### Features:
+* **Real-Time Score & Progress:** Live progress bar, total score counter, and separate Red vs. Blue team score breakdown.
+* **Instant Validation:** Accepts either the full CTF format (`SCENARIO75{...}`) or the raw inner string (e.g. `Node.js`).
+* **Visual Status Badges:** Challenges are clearly tagged as `[✔ SUBMITTED]` or `[⏳ PENDING / UNSUBMITTED]`.
+* **Interactive Filter Tabs:** Quickly filter by **All (33)**, **Red Team (15)**, **Blue Team (18)**, **Submitted**, or **Unsubmitted**.
+* **Progress Reset:** One-click reset button to clear local progress between demo runs or student sessions.
+* **REST API:** Supports programmatic submission via `POST /flag` and JSON status polling at `GET /api/flag/status`.
+
+---
+
+### 2. Interactive CLI Scoreboard (`scripts/scoreboard.py`)
 
 A built-in, terminal-based scoreboard is provided for students and evaluation sessions. It tracks solved challenges in real time, displays a visual completion bar, and computes total scores across both Red and Blue team paths.
 

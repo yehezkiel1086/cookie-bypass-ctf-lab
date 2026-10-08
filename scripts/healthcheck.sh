@@ -46,7 +46,17 @@ else
     exit 1
 fi
 
-# 5. Check Blue Team SSH port 2275
+# 5. Check /flag submission portal
+echo -n "[*] Testing /flag submission & challenge tracker portal: "
+FLAG_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${BASE_URL}/flag")
+if [ "$FLAG_STATUS" -eq 200 ]; then
+    echo "OK (200 OK)"
+else
+    echo "FAIL (Got $FLAG_STATUS)"
+    exit 1
+fi
+
+# 6. Check Blue Team SSH port 2275
 echo -n "[*] Testing Blue Team SSH port 2275: "
 if timeout 2 bash -c "</dev/tcp/${HOST}/2275" 2>/dev/null || nc -z -w2 "$HOST" 2275 2>/dev/null; then
     echo "OK (Port 2275 is open)"

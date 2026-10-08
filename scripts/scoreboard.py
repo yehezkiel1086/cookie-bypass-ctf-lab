@@ -289,9 +289,28 @@ CHALLENGES = [
   }
 ]
 
-PROGRESS_FILE = os.path.expanduser("~/.ctf_progress.json")
-if not os.access(os.path.dirname(PROGRESS_FILE) or ".", os.W_OK):
-    PROGRESS_FILE = os.path.join(os.path.dirname(__file__), ".ctf_progress.json")
+def resolve_progress_file():
+    candidates = [
+        os.path.join(os.environ.get("LOG_DIR", ""), "ctf_progress.json") if os.environ.get("LOG_DIR") else None,
+        "/opt/admin/logs/ctf_progress.json",
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "logs", "ctf_progress.json")),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "ctf_progress.json")),
+        os.path.expanduser("~/.ctf_progress.json")
+    ]
+    for c in filter(None, candidates):
+        if os.path.exists(c):
+            return c
+    # Return first writable path
+    for c in filter(None, candidates):
+        try:
+            d = os.path.dirname(c)
+            if os.path.exists(d) and os.access(d, os.W_OK):
+                return c
+        except Exception:
+            pass
+    return os.path.expanduser("~/.ctf_progress.json")
+
+PROGRESS_FILE = resolve_progress_file()
 
 def load_progress():
     if os.path.exists(PROGRESS_FILE):

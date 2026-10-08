@@ -18,14 +18,30 @@ const app = express();
 // Disable Express default x-powered-by so our sessionMiddleware sets 'Node.js' explicitly
 app.disable("x-powered-by");
 
-// CORS headers to ensure browser fetch never encounters NetworkError
+// CORS headers to ensure browser fetch works properly while respecting endpoint method restrictions
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, Authorization, X-Requested-With");
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
+
+  // The feedback submission endpoint must exclusively use the POST method (SCENARIO75{POST})
+  const isFeedbackEndpoint = req.path === "/api/feedback" || req.originalUrl?.split("?")[0] === "/api/feedback";
+
+  if (isFeedbackEndpoint) {
+    res.setHeader("Access-Control-Allow-Methods", "POST");
+    res.setHeader("Allow", "POST");
+    if (req.method !== "POST") {
+      return res.status(405).json({
+        error: "Method Not Allowed. The feedback submission endpoint exclusively uses the POST method.",
+        allowedMethod: "POST"
+      });
+    }
+  } else {
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    if (req.method === "OPTIONS") {
+      return res.sendStatus(204);
+    }
   }
+
   next();
 });
 

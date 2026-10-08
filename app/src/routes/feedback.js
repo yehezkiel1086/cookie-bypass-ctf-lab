@@ -17,8 +17,9 @@ router.get("/", (req, res) => {
 
 // Reject non-POST requests to ensure endpoint exclusively uses POST (SCENARIO75{POST})
 router.all("/api/feedback", (req, res, next) => {
+  res.setHeader("Allow", "POST");
+  res.setHeader("Access-Control-Allow-Methods", "POST");
   if (req.method !== "POST") {
-    res.setHeader("Allow", "POST");
     return res.status(405).json({
       error: "Method Not Allowed. The feedback submission endpoint exclusively uses the POST method.",
       allowedMethod: "POST"
@@ -29,6 +30,8 @@ router.all("/api/feedback", (req, res, next) => {
 
 // Feedback submission endpoint
 router.post("/api/feedback", naiveWaf, (req, res) => {
+  res.setHeader("Allow", "POST");
+  res.setHeader("Access-Control-Allow-Methods", "POST");
   const { department, message } = req.body;
 
   if (!message || message.trim() === "") {

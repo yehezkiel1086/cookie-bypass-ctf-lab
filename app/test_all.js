@@ -112,6 +112,17 @@ async function runComprehensiveTests() {
       "Feedback endpoint exclusively requires POST method (rejects GET with 405)",
       "SCENARIO75{POST}"
     );
+    assert(
+      getFeedbackRes.headers["access-control-allow-methods"] === "POST" && getFeedbackRes.headers["allow"] === "POST",
+      "Feedback endpoint response headers exclusively advertise POST (Access-Control-Allow-Methods: POST)"
+    );
+
+    // OPTIONS to /api/feedback is also rejected and strictly advertises POST
+    const optionsFeedbackRes = await request("/api/feedback", { method: "OPTIONS" });
+    assert(
+      optionsFeedbackRes.status === 405 && optionsFeedbackRes.headers["access-control-allow-methods"] === "POST",
+      "Feedback endpoint rejects OPTIONS and strictly returns Access-Control-Allow-Methods: POST"
+    );
 
     // Naive WAF blocks <script>
     const scriptPayload = "message=" + encodeURIComponent("<script>alert(1)</script>");

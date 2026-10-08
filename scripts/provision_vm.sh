@@ -33,23 +33,9 @@ if ! command -v docker &> /dev/null; then
   systemctl enable --now docker
 fi
 
-# 3. Setup Blue Team SSH Analyst User
-echo "[+] Configuring Blue Team analyst account..."
-if ! id "analyst" &>/dev/null; then
-  useradd -m -s /bin/bash analyst
-fi
-echo "analyst:blue_team_rocks" | chpasswd
-
-# Configure SSH on port 2275
-SSHD_CONFIG="/etc/ssh/sshd_config.d/lab.conf"
-mkdir -p /etc/ssh/sshd_config.d/
-cat << 'EOF' > "$SSHD_CONFIG"
-Port 2275
-PasswordAuthentication yes
-PermitRootLogin no
-EOF
-
-systemctl restart ssh || systemctl restart sshd
+# 3. Setup Blue Team SSH Analyst User on Port 2275 (/etc/ssh/sshd_config)
+echo "[+] Configuring Blue Team SSH service (/etc/ssh/sshd_config on port 2275)..."
+bash "$LAB_DIR/scripts/setup-ssh.sh"
 
 # 4. Prepare logs directory
 mkdir -p "$LOG_DIR"

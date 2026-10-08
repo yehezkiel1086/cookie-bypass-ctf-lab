@@ -46,4 +46,12 @@ else
     exit 1
 fi
 
+# 5. Check Blue Team SSH port 2275
+echo -n "[*] Testing Blue Team SSH port 2275: "
+if timeout 2 bash -c "</dev/tcp/${HOST}/2275" 2>/dev/null || nc -z -w2 "$HOST" 2275 2>/dev/null; then
+    echo "OK (Port 2275 is open)"
+else
+    echo "NOTICE (Check if ssh service is running on port 2275)"
+fi
+
 echo "[+] All health checks passed successfully!"

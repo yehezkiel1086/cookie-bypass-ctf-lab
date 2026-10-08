@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Authentication & MFA Verification - CorpSec</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .auth-card {
+      max-width: 480px;
+      margin: 2rem auto;
+    }
+    .mfa-step {
+      display: none;
+    }
+    .demo-credentials {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px dashed var(--border-color);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="container">
+      <div class="logo">
+        <span class="icon">🛡️</span>
+        <span class="brand">CorpSec Admin Portal</span>
+      </div>
+      <div class="nav-links">
+        <a href="/" class="nav-item">Feedback Form</a>
+        <a href="/flag" class="nav-item">Scoreboard</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    <section class="card auth-card">
+      <div class="card-header" style="text-align: center;">
+        <h2>Administrator Sign-In</h2>
+        <p class="subtitle">Internal Access Gateway for Corporate Operations Console</p>
+      </div>
+
+      <div id="alert-box" class="alert hidden"></div>
+
+      <!-- Step 1: Password Form -->
+      <form id="login-form">
+        <div id="step-1">
+          <div class="form-group">
+            <label for="username">Administrator Username</label>
+            <input type="text" id="username" class="form-control" value="secadmin_01" required autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" class="form-control" value="admin" required autocomplete="current-password">
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+              <span>Proceed to MFA Challenge</span>
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Step 2: MFA Verification Form -->
+      <form id="mfa-form" class="mfa-step">
+        <div class="form-group">
+          <label for="mfa-code">Multi-Factor Authentication (MFA) Code</label>
+          <input type="text" id="mfa-code" class="form-control" placeholder="Enter 6-digit TOTP code (e.g. 750075)" required maxlength="6" autofocus>
+          <small style="color:var(--text-muted); display:block; margin-top:0.35rem;">
+            Endpoint: <code>/api/verify-mfa</code> (Required for <code>adm_sess</code> issuance)
+          </small>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" style="width: 100%;">
+            <span>Verify MFA &amp; Enter Dashboard</span>
+          </button>
+        </div>
+      </form>
+
+      <div class="demo-credentials">
+        <strong>Lab Victim Simulation Context:</strong><br>
+        This portal simulates the victim administrator's legitimate authentication flow. Upon MFA completion, an authenticated session cookie (<code>adm_sess</code>) is issued.<br>
+        Default credentials: <code>secadmin_01</code> / <code>admin</code> (MFA code: any 6 digits).
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2026 PT Nauli Mula Data - Cyber Range Engineering.</p>
+    </div>
+  </footer>
+
+  <script>
+    const loginForm = document.getElementById('login-form');
+    const mfaForm = document.getElementById('mfa-form');
+    const step1 = document.getElementById('step-1');
+    const alertBox = document.getElementById('alert-box');
+
+    function showAlert(msg, isSuccess = true) {
+      alertBox.textContent = msg;
+      alertBox.className = 'alert ' + (isSuccess ? 'alert-success' : 'alert-danger');
+      alertBox.classList.remove('hidden');
+    }
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      if (!username) return;
+
+      showAlert('Password verified for ' + username + '. Please enter MFA challenge code.', true);
+      step1.style.display = 'none';
+      mfaForm.style.display = 'block';
+      document.getElementById('mfa-code').focus();
+    });
+
+    mfaForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const mfaCode = document.getElementById('mfa-code').value.trim();
+      const username = document.getElementById('username').value.trim();
+
+      try {
+        const resp = await fetch('/api/verify-mfa', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ username, mfa_code: mfaCode })
+        });
+
+        const data = await resp.json();
+
+        if (resp.ok && data.success) {
+          showAlert('MFA verified! Admin session cookie issued. Redirecting to dashboard...', true);
+          setTimeout(() => {
+            window.location.href = data.redirect || '/dashboard';
+          }, 800);
+        } else {
+          showAlert(data.message || 'MFA validation failed.', false);
+        }
+      } catch (err) {
+        showAlert('Network error during MFA verification.', false);
+      }
+    });
+  </script>
+</body>
+</html>

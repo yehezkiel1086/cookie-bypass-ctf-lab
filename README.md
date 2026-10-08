@@ -298,8 +298,31 @@ curl -s -X POST http://feedback.admin.local:3075/api/feedback \
 
 ### Phase 3: Initial Access (Session Replay & MFA Bypass)
 
-#### Step 3.1: Admin Session Token Exfiltration
-When the victim administrator views the feedback queue at `/dashboard`, the stored SVG payload triggers in their browser context. The authenticated session cookie is exfiltrated:
+#### Step 3.1: Admin Session Token Exfiltration (Victim Simulation)
+When the victim administrator (`secadmin_01`) logs in with MFA and views the feedback queue at `/dashboard`, the stored SVG payload executes in their browser context, exfiltrating the authenticated `adm_sess` cookie.
+
+You can simulate the victim admin login using any of the following methods:
+
+- **Option A (Automated Simulation Script):**
+  Run the dedicated victim simulator tool:
+  ```bash
+  python3 scripts/simulate_admin.py http://feedback.admin.local:3075
+  ```
+  *This automatically authenticates as `secadmin_01` via MFA, opens `/dashboard`, executes any stored XSS in the feedback queue, fires the HTTP exfiltration to your listener, and outputs the stolen `adm_sess` cookie.*
+
+- **Option B (Interactive Admin Login Portal):**
+  In a separate browser window, visit:
+  `http://feedback.admin.local:3075/login`
+  - Username: `secadmin_01` | Password: `admin`
+  - MFA Challenge Code: `750075` (or any 6 digits)
+  - Submitting prompts `/api/verify-mfa`, sets `adm_sess`, and redirects to `/dashboard`, firing the stored XSS payload in your browser.
+
+- **Option C (One-Click API / UI Simulation):**
+  Click the **"Simulate Admin Review"** button on the feedback form, or trigger via curl:
+  ```bash
+  curl -X POST http://feedback.admin.local:3075/api/admin/simulate-review
+  ```
+
 - **Finding:** Session token begins with prefix `adm_sess`.
 - **CTF Flag:** `SCENARIO75{adm_sess}`
 
@@ -690,6 +713,7 @@ In standard organizational cybersecurity exercises or university competitions:
 ├── logs/                       # Access and error logs (/opt/admin/logs)
 ├── scripts/
 │   ├── scoreboard.py           # Interactive student CTF scoreboard & flag submission
+│   ├── simulate_admin.py       # Victim admin review simulation & XSS cookie exfiltration
 │   ├── provision_vm.sh         # Proxmox VM bootstrap script (Docker, SSH, deploy)
 │   ├── setup-ssh.sh            # Custom port 2275 SSH config for analyst user
 │   ├── inject_logs.py          # Generates simulated forensic telemetry

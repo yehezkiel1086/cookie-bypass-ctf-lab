@@ -198,6 +198,32 @@ async function runComprehensiveTests() {
       "SCENARIO75{RED_C00k13_MFA_Byp4ss_0wn3d}"
     );
 
+    // Victim Admin Login & Simulation
+    const loginRes = await request("/login");
+    assert(
+      loginRes.status === 200 && loginRes.body.includes("Administrator Sign-In"),
+      "GET /login serves administrator login and MFA challenge portal"
+    );
+
+    const mfaRes = await request("/api/verify-mfa", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: "secadmin_01", mfa_code: "750075" })
+    });
+    const mfaSetCookie = mfaRes.headers["set-cookie"] || [];
+    const mfaCookieStr = Array.isArray(mfaSetCookie) ? mfaSetCookie.join("; ") : mfaSetCookie;
+    assert(
+      mfaRes.status === 200 && mfaCookieStr.includes("adm_sess="),
+      "POST /api/verify-mfa issues valid adm_sess cookie upon MFA completion"
+    );
+
+    const simRes = await request("/api/admin/simulate-review", { method: "POST" });
+    const simData = JSON.parse(simRes.body);
+    assert(
+      simRes.status === 200 && simData.success === true && simData.triggeredXss === true,
+      "POST /api/admin/simulate-review simulates victim admin viewing feedback queue and firing stored XSS"
+    );
+
     // -------------------------------------------------------------
     // FLAG SUBMISSION & CHALLENGE TRACKING PORTAL (/flag)
     // -------------------------------------------------------------

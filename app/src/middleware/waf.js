@@ -10,13 +10,20 @@ export function naiveWaf(req, res, next) {
     const rawPayload = String(req.body.message);
     const clientIp = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "127.0.0.1";
 
-    // Naive rule checks
+    // Naive rule checks:
+    // 1. Block script tags
     const hasScriptTag = /<script\b/i.test(rawPayload);
-    const hasDocumentCookie = /document\.cookie/i.test(rawPayload);
+    // 2. Block unseparated keyword access to document and cookies
+    const hasDocumentKeyword = /document/i.test(rawPayload);
+    const hasCookieKeyword = /cookie/i.test(rawPayload);
 
-    if (hasScriptTag || hasDocumentCookie) {
+    if (hasScriptTag || hasDocumentKeyword || hasCookieKeyword) {
+      const matched = hasScriptTag
+        ? "<script>"
+        : (hasDocumentKeyword ? "document" : "cookie");
+
       telemetryService.logSecurityEvent("WARN", `[WAF] Blocked suspicious payload from ${clientIp}`, {
-        matchedPattern: hasScriptTag ? "<script>" : "document.cookie",
+        matchedPattern: matched,
         payload: rawPayload
       });
 

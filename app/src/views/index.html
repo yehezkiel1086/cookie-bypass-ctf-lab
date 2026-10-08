@@ -39,7 +39,7 @@
 
       <div id="alert-box" class="alert hidden"></div>
 
-      <form id="feedback-form" action="/api/feedback" method="POST">
+      <form id="feedback-form" action="/api/feedback" method="POST" onsubmit="return false;">
         <div class="form-group">
           <label for="department">Department</label>
           <select id="department" name="department" class="form-control">
@@ -75,33 +75,44 @@
   </footer>
 
   <script>
-    // Handle form submission via AJAX or standard POST
+    // Handle form submission via AJAX with robust response handling
     const form = document.getElementById('feedback-form');
     const alertBox = document.getElementById('alert-box');
 
     form.addEventListener('submit', async (e) => {
-      // Standard form submissions still work, but enhance with immediate UI feedback
       e.preventDefault();
-      const message = document.getElementById('message').value;
-      const department = document.getElementById('department').value;
+      e.stopPropagation();
+
+      const messageInput = document.getElementById('message');
+      const departmentInput = document.getElementById('department');
+      const message = messageInput.value;
+      const department = departmentInput.value;
       
       try {
         const response = await fetch('/api/feedback', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json, text/plain, */*'
           },
           body: new URLSearchParams({ department, message })
         });
 
-        const data = await response.json();
+        let msgText = '';
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const data = await response.json();
+          msgText = data.message || data.error || (response.ok ? 'Feedback received successfully.' : 'Error submitting feedback.');
+        } else {
+          msgText = (await response.text()).trim();
+        }
 
         alertBox.className = 'alert ' + (response.ok ? 'alert-success' : 'alert-danger');
-        alertBox.textContent = data.message || (response.ok ? 'Feedback received successfully.' : 'Error submitting feedback.');
+        alertBox.textContent = msgText || (response.ok ? 'Feedback received successfully.' : 'Error submitting feedback.');
         alertBox.classList.remove('hidden');
 
         if (response.ok) {
-          form.reset();
+          messageInput.value = '';
         }
       } catch (err) {
         alertBox.className = 'alert alert-danger';

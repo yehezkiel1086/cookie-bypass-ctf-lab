@@ -17,6 +17,17 @@ const app = express();
 // Disable Express default x-powered-by so our sessionMiddleware sets 'Node.js' explicitly
 app.disable("x-powered-by");
 
+// CORS headers to ensure browser fetch never encounters NetworkError
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, Authorization, X-Requested-With");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+  next();
+});
+
 // Request parsing
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

@@ -40,11 +40,11 @@ router.post("/api/feedback", naiveWaf, (req, res) => {
   if (req.headers.accept && req.headers.accept.includes("application/json")) {
     return res.status(200).json({
       success: true,
-      message: "Feedback submitted successfully to administrator review queue."
+      message: "Feedback received and queued for admin review."
     });
   }
 
-  // Support plain text or redirect for standard curl requests
+  // Support plain text for standard curl requests
   return res.status(200).send("Feedback received and queued for admin review.\n");
 });
 

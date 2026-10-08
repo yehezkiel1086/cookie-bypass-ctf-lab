@@ -18,6 +18,13 @@ echo "[+] Updating apt repositories and installing packages..."
 apt-get update -y
 apt-get install -y ca-certificates curl gnupg lsb-release python3 python3-pip openssh-server
 
+# Configure internal network zone domain and hostname (feedback.admin.local)
+echo "[+] Configuring internal network zone hostname (feedback.admin.local)..."
+hostnamectl set-hostname feedback.admin.local 2>/dev/null || true
+if ! grep -q "feedback.admin.local" /etc/hosts; then
+  echo "127.0.0.1 feedback.admin.local feedback" >> /etc/hosts
+fi
+
 # 2. Install Docker if not present (Ubuntu 22.04 & 24.04 compatible)
 if ! command -v docker &> /dev/null; then
   echo "[+] Installing Docker..."
